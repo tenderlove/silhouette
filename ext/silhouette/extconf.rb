@@ -15,4 +15,4 @@ else
   exit(1)
 end
 
-create_makefile("silhouette_ext")
+create_makefile("silhouette")

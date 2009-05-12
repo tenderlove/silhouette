@@ -277,7 +277,7 @@ static VALUE extprof_end(VALUE self) {
 	return Qtrue;
 }
 
-void Init_silhouette_ext() {
+void Init_silhouette() {
 	VALUE extprof;
 	extprof = rb_define_module("Silhouette");
 	rb_define_const(extprof, "CALL", INT2NUM(RUBY_EVENT_CALL | RUBY_EVENT_RETURN));
