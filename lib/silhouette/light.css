@@ -1,0 +1,63 @@
+TABLE {
+    FONT-SIZE: 11px
+}
+
+TABLE.code {
+    border:black 1px solid;
+}
+
+BODY {
+    FONT-FAMILY: sans-serif;
+}
+.coverageHit { 
+    border-right:#dcdcdc 1px solid;
+    background-color:#c8c8f0;
+}
+.coverageCount, .lineCount { border-right:#dcdcdc 1px solid; }
+.coverageMissing, .coverageMissed { 
+    border-right:#dcdcdc 1px solid;
+    background-color:#F0C8C8;
+}
+.coverageMissed { border-right:#dcdcdc 1px solid; }
+.lineNonCode { 
+    border-right:#dcdcdc 1px solid;
+    background-color:#f0f0f0;
+}
+.lineCount { 
+    border-right:#dcdcdc 1px solid; 
+    background-color:#c8c8f0;
+}
+.sourceLineHighlight {
+    background-color:#F0C8C8;
+}
+
+.sourceLineGoodHighlight {
+    background-color:#c1ffd1;
+}
+
+.coverageMethod {
+    background-color:#c1ffd1;
+}
+
+.sourceLinePartialHighlight {
+    background-color:#f1f1f1;
+}
+
+.normal {}
+.comment { color: #005; font-style: italic; }
+.keyword { color: #0000dd; }
+.method { color: #077; }
+.class { color: #074; }
+.module { color: #050; }
+.punct { color: #447; font-weight: bold; }
+.symbol { color: #099; }
+.string { color: #b58401; }
+.char { color: #F07; }
+.ident { color: #004; }
+.constant { color: #07F; }
+.regex { color: #B66; background: #FEF; }
+.number { color: #e15858;; }
+.attribute { color: #3d93a9; }
+.global { color: #7FB; }
+.expr { color: #227; }
+.escape { color: #277; }

@@ -1,0 +1,101 @@
+#!/usr/bin/env ruby
+require 'optparse'
+require 'silhouette/process'
+
+output = nil
+max = nil
+entry = nil
+depth = nil
+ascii = nil
+long = false
+callsite = false
+gzip = false
+processed = nil
+load = false
+
+STDOUT.sync = true
+
+opt = OptionParser.new do |opt|
+    opt.on("-m", "--max MAX", "Only show the top N call sites") do |m|
+        max = m.to_i
+    end
+
+    opt.on("-e SIG","Only profile calls made from +SIG+") do |e|
+        entry = e
+    end
+
+    opt.on("-d DEPTH", "Only process calls +DEPTH+ levels down") do |o|
+        depth = o.to_i
+    end
+    
+    opt.on("-s", "--site", "Profile based on method call and call site") do |o|
+        callsite = true 
+    end
+    
+    opt.on("-a OUT", "Convert a binary profile file to an ASCII one") do |a|
+        ascii = a
+    end
+    
+    opt.on("-l", "Use the long format for the ASCII profile") do |l|
+        long = true
+    end
+    
+    opt.on("-z", "Use GZIP when reading data") do |z|
+        gzip = z
+    end
+    
+    opt.on("-p FILE", "Process the profile data and save the processed data") do |o|
+        processed = o
+        STDERR.puts "Saving processed data to #{processed}"
+    end
+    
+    opt.on("-r FILE", "Load data and process directly") do |o|
+        load = o
+    end
+    
+    opt.on("-h", "--help") do
+        puts opt
+        exit 1
+    end
+end
+
+opt.parse!
+
+if load
+    rp = Marshal.load(File.open(load))
+    rp.print(STDOUT, max)
+    exit
+end
+
+unless file = ARGV.shift
+    STDERR.puts "Please specify a file to process."
+end
+
+emit = Silhouette.find_emitter(file)
+
+if ascii
+    if long
+        ap = Silhouette::ASCIIConverterLong.new(ascii)
+    else
+        ap = Silhouette::ASCIIConverter.new(ascii)
+    end
+    puts "Saving ASCII profile to #{ascii} using #{ap.class}"
+    emit.processor = ap
+    emit.parse
+    ap.close
+    puts "Saved."
+    exit
+end
+
+if entry
+    rp = Silhouette::EntryPointProfiler.new(file, entry, depth)
+else
+    rp = Silhouette::DefaultProfiler.new(callsite)
+end
+emit.processor = rp
+emit.parse
+if processed
+    rp.save(processed)
+    STDERR.puts "Saved data to #{processed}."
+end
+rp.print(STDOUT,max)

@@ -1,0 +1,75 @@
+#!/usr/bin/env ruby
+
+require 'silhouette/setup'
+require 'optparse'
+require 'ostruct'
+
+options = Silhouette::Options.new
+options.import_env
+
+cfg = OpenStruct.new
+
+opts = OptionParser.new do |o|
+  o.on "-n", "--no-compression", "Don't compress data files." do
+    options.compress = false
+  end
+  
+  o.on "-c", "--coverage", "Only generate coverage information." do
+    options.coverage = true
+  end
+  
+  o.on "-s", "--send HOST:PORT", 
+        "Send information via TCP to this address." do |h|
+    host, port = h.split(":")
+    require 'socket'
+    begin
+      sock = TCPSocket.new(host, port.to_i)
+    rescue Object => e
+      puts "Unable to connect to #{h}: #{e.message} (#{e.class})"
+      exit 1
+    end
+    options.file = sock
+    options.location = h
+  end
+  
+  o.on "-a", "--all", "Generate as much information as possible." do
+    options.all = true
+  end
+  
+  o.on "-r", "--require LIB", "Require this library." do |r|
+    require r
+  end
+  
+  o.on "-I", "--include PATH", "Prepend this include path." do |i|
+    $:.unshift i
+  end
+  
+  o.on "-d", "--debug", "Turn debug on" do
+    $DEBUG = true
+  end
+  
+  o.on "-w", "--warn", "Turn warnings on" do
+    $VERBOSE = true
+  end
+  
+  o.on "-h", "--help" do
+    puts o
+    exit 1
+  end
+end
+
+opts.parse!
+
+if ARGV.empty?
+  puts "No file to run!"
+  exit 1
+end
+
+options.describe = true
+
+args, file = options.setup_args
+
+STDERR.puts "Logging profile information to #{file}"
+Silhouette.start_profile *args
+
+require ARGV.first

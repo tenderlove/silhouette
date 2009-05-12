@@ -1,0 +1,70 @@
+#!/usr/bin/env ruby
+require 'silhouette/process'
+require 'silhouette/coverage'
+require 'optparse'
+require 'ostruct'
+
+cfg = OpenStruct.new
+
+opt = OptionParser.new do |o|
+  o.on "-x", "--xml FILE", "Output as XML to FILE" do |file|
+    cfg.xml = file
+  end
+  
+  o.on "-h", "--html DIR", "Ouput as HTML to DIR" do |file|
+    cfg.html = file
+  end
+  
+  o.on "-c", "--compact", "Use the compact output for the text mode" do
+    cfg.compact = true
+  end
+  
+  o.on "-s", "--stats", "Output stats only" do
+    cfg.stats = true
+  end
+  
+  o.on "-m", "--match MATCH", "Only generate coverage info for files matching MATCH" do |m|
+    cfg.match = m
+  end
+  
+  o.on "-l", "--light", "Use the light colored CSS definitions." do
+    cfg.light = true
+  end
+  
+  o.on "-I PATH", "Add path to includes." do |m|
+    $:.unshift m
+  end
+end
+
+opt.parse!
+file = ARGV.shift
+
+emit = Silhouette.find_emitter(file)
+
+cov = Silhouette::CoverageProcessor.new
+if cfg.match
+  cov.match_files = Regexp.new(cfg.match)
+end
+
+if cfg.light
+  cov.css = "light.css"
+end
+emit.processor = cov
+emit.parse
+
+if cfg.xml
+  File.open(cfg.xml, "w") do |fd|
+    fd << cov.to_xml
+  end
+elsif cfg.html
+  unless File.exists? cfg.html
+    Dir.mkdir cfg.html
+  end
+  cov.to_html cfg.html
+else
+  if cfg.stats
+    print cov.stats
+  else
+    print cov.to_ascii(cfg.compact)
+  end
+end
